@@ -1,4 +1,4 @@
-//go:generate go run ../gen/partial.go
+//go:generate go run ../cmd/partial
 package test
 
 import (
