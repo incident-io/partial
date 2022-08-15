@@ -38,7 +38,7 @@ Then add a `go:generate` comment to each package that contains relevant structs:
 Within that package, annotate each struct that you want a matcher or builder for
 with:
 ```go
-// partial:builder,matcher
+// codegen-partial:builder,matcher
 type MyStruct struct {
   ...
 }
@@ -51,7 +51,7 @@ example:
 //go:generate partial
 package things
 
-// partial:builder
+// codegen-partial:builder
 type MyStruct struct {
   Thing1 string
   Thing2 string
@@ -71,7 +71,7 @@ Because the builder is generated, you get type checking and autocompletion.
 The matcher produces Gomega matchers, that let you match on _part_ of the
 struct. If we update the comment in the above example to
 ```go
-// partial:builder,matcher
+// codegen-partial:builder,matcher
 ```
 
 we can then match as follows:

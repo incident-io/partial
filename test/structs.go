@@ -7,7 +7,7 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
-// partial:builder,matcher
+// codegen-partial:builder,matcher
 type Organisation struct {
 	ID             string      `json:"id" gorm:"type:text;primaryKey;default:generate_ulid()"`
 	Name           string      `json:"name"`
@@ -15,7 +15,7 @@ type Organisation struct {
 	BoolFlag       bool        `json:"bool_flag"`
 }
 
-// partial:builder,matcher
+// codegen-partial:builder,matcher
 type Incident struct {
 	ID             string `json:"id" gorm:"type:text;primaryKey;default:generate_ulid()"`
 	OrganisationID string `json:"organisation_id"`

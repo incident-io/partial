@@ -77,8 +77,8 @@ func runGeneration(dir string) error {
 	for pkgName, pkg := range pkgs {
 		docPkg := doc.New(pkg, "", doc.AllDecls)
 		for _, pkgType := range docPkg.Types {
-			if strings.Contains(pkgType.Doc, "partial:") {
-				codegenTags := regexp.MustCompile(`partial:(\S+)`).FindStringSubmatch(pkgType.Doc)[1]
+			if strings.Contains(pkgType.Doc, "codegen-partial:") {
+				codegenTags := regexp.MustCompile(`codegen-partial:(\S+)`).FindStringSubmatch(pkgType.Doc)[1]
 				pos := fset.Position(pkgType.Decl.TokPos)
 				structType := findStruct(pkg, pkgType.Name)
 
