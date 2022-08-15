@@ -2,10 +2,6 @@ package partial
 
 import (
 	"reflect"
-	"sync"
-
-	"github.com/samber/lo"
-	"gorm.io/gorm/schema"
 )
 
 // New builds a model from a domain object, tracking all the JSON fields of the model.
@@ -15,7 +11,6 @@ import (
 // objects, as those should be built directly into Partial's using their codegen'd
 // builders.
 func New[T any](subjectPtr *T) (model Partial[T], err error) {
-	s, err := schema.Parse(new(T), &sync.Map{}, schema.NamingStrategy{})
 	if err != nil {
 		return model, err
 	}
@@ -33,12 +28,6 @@ func New[T any](subjectPtr *T) (model Partial[T], err error) {
 		subjectType := reflect.TypeOf(subject).Elem()
 		for idx := 0; idx < subjectType.NumField(); idx++ {
 			field := subjectType.Field(idx)
-			_, found := lo.Find(s.Fields, func(schemaField *schema.Field) bool {
-				return schemaField.Name == field.Name && schemaField.DBName != ""
-			})
-			if !found {
-				continue
-			}
 
 			fieldNames = append(fieldNames, field.Name)
 			reflect.ValueOf(subject).Elem().FieldByIndex([]int{idx}).Set(
