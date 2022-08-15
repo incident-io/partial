@@ -49,7 +49,7 @@ func runGeneration(dir string) error {
 
 	fset := token.NewFileSet()
 	notCodegenFiles := func(info fs.FileInfo) bool {
-		return !strings.HasSuffix(info.Name(), ".partialgen.go")
+		return !strings.HasSuffix(info.Name(), ".genpartial.go")
 	}
 	pkgs, err := parser.ParseDir(fset, dir, notCodegenFiles, parser.ParseComments)
 	if err != nil {
@@ -105,7 +105,7 @@ func runGeneration(dir string) error {
 	buffers := map[string]*bytes.Buffer{}
 
 	for _, target := range targets {
-		targetFilename := strings.TrimSuffix(target.Filename, ".go") + ".partialgen.go"
+		targetFilename := strings.TrimSuffix(target.Filename, ".go") + ".genpartial.go"
 		buf, ok := buffers[targetFilename]
 		if !ok {
 			buf = bytes.NewBufferString(genPreamble(target.Package))
@@ -167,7 +167,7 @@ package %s
 `, pkg)
 }
 
-// removeExistingGenFiles removes all .partialgen.go files in the given directory, and should be
+// removeExistingGenFiles removes all .genpartial.go files in the given directory, and should be
 // run before we attempt to rebuild things.
 func removeExistingGenFiles(dir string) error {
 	entries, err := os.ReadDir(dir)
@@ -176,7 +176,7 @@ func removeExistingGenFiles(dir string) error {
 	}
 	for _, entry := range entries {
 		sourceFile := path.Join(dir, entry.Name())
-		if strings.HasSuffix(sourceFile, ".partialgen.go") {
+		if strings.HasSuffix(sourceFile, ".genpartial.go") {
 			if err := os.Remove(sourceFile); err != nil {
 				return err
 			}
@@ -263,18 +263,6 @@ func genBuilder(buf *bytes.Buffer, target *codegenTarget) error {
 		Fields:              fields,
 	}
 
-	for _, field := range vars.Fields {
-		if field.FieldTypeName != "string" {
-			continue // not an ID field!
-		}
-		if field.FieldName == "ID" {
-			vars.HasID = true
-		}
-		if field.FieldName == "OrganisationID" {
-			vars.HasOrganisationID = true
-		}
-	}
-
 	if err := builderTemplate.Execute(buf, vars); err != nil {
 		return errors.Wrap(err, "executing template")
 	}
@@ -286,24 +274,10 @@ type builderTemplateVars struct {
 	TypeName            string // APIKey
 	BuilderTypeName     string // APIKeyBuilder
 	BuilderFuncTypeName string // APIKeyBuilderFunc
-	HasID               bool
-	HasOrganisationID   bool
 	Fields              []*structField
 }
 
 var builderTemplate = template.Must(template.New("builderTemplate").Funcs(sprig.TxtFuncMap()).Parse(`
-{{ if .HasID }}
-func (t {{ .TypeName }}) GetID() string {
-	return t.ID
-}
-{{ end }}
-
-{{ if .HasOrganisationID }}
-func (t {{ .TypeName }}) GetOrganisationID() string {
-	return t.OrganisationID
-}
-{{ end }}
-
 // {{ .BuilderTypeName }} initialises a {{ .TypeName }} struct with fields from the given setters. Setters
 // are applied first to last, with subsequent sets taking precedence.
 var {{ .BuilderTypeName }} = {{ .BuilderFuncTypeName }}(func(opts ...func(*{{ .TypeName }}) []string) partial.Partial[{{ .TypeName }}] {
