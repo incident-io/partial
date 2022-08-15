@@ -7,7 +7,7 @@ require (
 	github.com/onsi/gomega v1.19.0
 	github.com/samber/lo v1.27.0
 	gopkg.in/guregu/null.v3 v3.5.0
-	gorm.io/gorm v1.23.8
+	gorm.io/gorm v1.21.13
 )
 
 require (
